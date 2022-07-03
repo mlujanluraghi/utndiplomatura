@@ -4,13 +4,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');//index.js
-var usersRouter = require('./routes/users');//users.js
-var scrapRouter = require('./routes/scrap');//routes/scrap.js
-var nomeacuerdoRouter = require('./routes/nomeacuerdo');//routes/nomeacuerdo.js
-var galeriaRouter = require('./routes/galeria');//routes/galeria.js
-var diyRouter = require('./routes/diy');//routes/diy.js
-var contactoRouter = require('./routes/contacto');//routes/contacto.js
+var session = require('express-session');
+
+// var indexRouter = require('./routes/index');
+// var usersRouter = require('./routes/users');
 
 var app = express();
 
@@ -24,24 +21,59 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use(session({
+  secret: 'algopocoserio',
+  resave: false,
+  saveUninitialized: true
+}));
 
-app.use('/scrap', scrapRouter);
-app.use('/nomeacuerdo', nomeacuerdoRouter);
-app.use('/galeria', galeriaRouter);
-app.use('/diy', diyRouter);
-app.use('/contacto', contactoRouter);
-
+// app.use('/', indexRouter);
 
 
-app.get('/prueba', function (req, res) {
-  res.send('Soy la pagina de prueba')
+
+app.get('/', function (req, res) {
+  var conocido = Boolean(req.session.nombre);
+
+  res.render('index', {
+    title: 'Sessiones en Express.js',
+    conocido: conocido,
+    nombre: req.session.nombre
+  })
 })
 
-app.get('/scrap', function (req, res) {
-  res.send('Soy la pagina de scrapbook')
-})
+app.post('/ingresar', function (req, res) {
+  if (req.body.nombre) {
+    req.session.nombre = req.body.nombre
+  }
+  res.redirect('/');
+});
+
+
+app.get('/salir', function (req, res) {
+  req.session.destroy();
+  res.redirect('/');
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
